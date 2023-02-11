@@ -29,7 +29,7 @@ const PORT = 3500;
 const server = express();
 
 server.use(cors({
-    origin: ['http://localhost:3000', 'http://172.20.10.2:3000'],
+    origin: ['http://localhost:3000', 'http://172.20.10.2:3000', 'http://ec2-3-239-233-231.compute-1.amazonaws.com:3500'],
     credentials: true,
 }))
 
