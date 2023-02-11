@@ -102,26 +102,31 @@ server.post('/sign-in/local',
 
 //USER VERIFIED REDIRCET ROUTE
 server.use('/user-verified', async (req, res) => {
-    if (req?.isAuthenticated) {
+    try {
+        if (req?.isAuthenticated) {
 
-        let UserExists;
-        if (req?.session.passport?.user === 'google') {
-            UserExists = await db.collection('users').findOne({ googleId: req?.session.passport?.user?.id });
-        }
-        else {
-            console.log(req?.session?.passport)
-            UserExists = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
-        }
+            let UserExists;
+            if (req?.session.passport?.user === 'google') {
+                UserExists = await db.collection('users').findOne({ googleId: req?.session.passport?.user?.id });
+            }
+            else {
+                UserExists = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
+            }
 
-        if (UserExists !== null || UserExists !== undefined) {
-            res.status(200).json({ "stagename": `${UserExists.stagename}`, "profilePicture": UserExists.profilePicture, stagenameInUrl: create_Username_url(UserExists?.stagename), websiteCreated: UserExists?.websiteCreated })
-        }
-        else {
+            if (UserExists !== null || UserExists !== undefined) {
+                console.log(UserExists)
+                res.status(200).json({ "stagename": `${UserExists.stagename}`, "profilePicture": UserExists.profilePicture, stagenameInUrl: create_Username_url(UserExists?.stagename), websiteCreated: UserExists?.websiteCreated })
+            }
+            else {
+                res?.sendStatus(403);
+            }
+
+        } else {
             res?.sendStatus(403);
         }
-
-    } else {
-        res?.sendStatus(403);
+    } catch (error) {
+        console.log(error);
+        res?.sendStatus(500)
     }
 })
 
@@ -138,22 +143,27 @@ server.use('/failed-to-login', (req, res) => {
 //FAILED TO VERIFY USER REDIRECT ROUTE
 
 server.get('/sign-out', (req, res) => {
-    if (req?.isAuthenticated()) {
-        req?.logout({ keepSessionInfo: false }, (err) => {
-            req?._destroy(null, (err) => {
-                if (!err) {
-                    res.clearCookie('connect.sid', { path: "/" });
-                    res?.sendStatus(200);
-                }
-                else {
-                    res?.sendStatus(500);
-                }
+    try {
+        if (req?.isAuthenticated()) {
+            req?.logout({ keepSessionInfo: false }, (err) => {
+                req?._destroy(null, (err) => {
+                    if (!err) {
+                        res.clearCookie('connect.sid', { path: "/" });
+                        res?.sendStatus(200);
+                    }
+                    else {
+                        res?.sendStatus(500);
+                    }
+                });
             });
-        });
-    } else {
-        res.sendStatus(200);
-    }
+        } else {
+            res.sendStatus(200);
+        }
 
+    } catch (error) {
+        console.log(error);
+        res?.sendStatus(200);
+    }
 })
 
 
