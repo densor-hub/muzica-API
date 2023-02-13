@@ -87,13 +87,7 @@ server.get('/google/callback',
 
 
 //SIGN IN USERNAME AND PASSWORD ROUTE
-server.post('/sign-in/local',
-    passport.authenticate('local', {
-        failureRedirect: '/failed-to-login',
-        successRedirect: '/user-verified'
-    },
-    )
-)
+
 
 server.post('/sign-in/local', (req, res, next) => {
     passport.authenticate("local", {
