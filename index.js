@@ -16,7 +16,6 @@ initiatePassportLocal(passport);
 
 require('./Routes/googleAuth');
 
-
 const VerifyURLparams = require('./Middleware/VerifyURLparams');
 const verifySearch = require('./Middleware/verifySearch');
 const SingleItem = require('./Middleware/SingleItem');
@@ -43,7 +42,6 @@ server.use(session({
     cookie: {
         httpOnly: true,
         sameSite: "lax",
-        secure: 'auto'
     }
 }));
 
@@ -88,22 +86,39 @@ server.get('/google/callback',
 
 
 
-
-
-
 //SIGN IN USERNAME AND PASSWORD ROUTE
 server.post('/sign-in/local',
     passport.authenticate('local', {
         failureRedirect: '/failed-to-login',
         successRedirect: '/user-verified'
-    }));
+    },
+    )
+)
 
-
+server.post('/sign-in/local', (req, res, next) => {
+    passport.authenticate("local", {
+        failureFlash: true,
+    }, (err, user, info) => {
+        if (err !== null || user === false) {
+            req.session.save(() => {
+                res.redirect('/failed-to-login');
+            });
+        } else {
+            req.logIn(user, err => {
+                req.session.save(() => {
+                    res.redirect('/user-verified');
+                });
+            });
+        }
+    })(req, res, next);
+});
 
 //USER VERIFIED REDIRCET ROUTE
 server.use('/user-verified', async (req, res) => {
     try {
         if (req?.isAuthenticated) {
+            console.log("passport")
+            console.log(req?.session)
 
             let UserExists;
             if (req?.session.passport?.user === 'google') {
@@ -113,7 +128,7 @@ server.use('/user-verified', async (req, res) => {
                 UserExists = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
             }
 
-            if (UserExists !== null || UserExists !== undefined) {
+            if (UserExists !== null && UserExists !== undefined) {
                 console.log(UserExists)
                 res.status(200).json({ "stagename": `${UserExists.stagename}`, "profilePicture": UserExists.profilePicture, stagenameInUrl: create_Username_url(UserExists?.stagename), websiteCreated: UserExists?.websiteCreated })
             }
