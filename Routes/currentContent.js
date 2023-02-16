@@ -4,12 +4,13 @@ const { ObjectId } = require('mongodb')
 router.route('/')
 
     .get(async (req, res) => {
-        if (!req?.isAuthenticated()) {
-            res.sendStatus(401);
-        }
-        else {
-            try {
-                let isValidUser = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
+        try {
+            if (!req?.cookies?.Bearer) {
+                res.sendStatus(401);
+            }
+            else {
+
+                let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
 
                 if (isValidUser === null) {
                     res.sendStatus(401)
@@ -24,22 +25,23 @@ router.route('/')
                         res.sendStatus(204);
                     }
                 }
-
-            } catch (error) {
-                console.log(error);
-                res?.sendStatus(500);
             }
+
+        } catch (error) {
+            console.log(error);
+            res?.sendStatus(500);
         }
     })
 
     .post(async (req, res) => {
-        if (!req?.isAuthenticated()) {
-            res.sendStatus(401);
-        }
-        else {
-            try {
+        try {
 
-                let isValidUser = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
+            if (!req?.cookies?.Bearer) {
+                res.sendStatus(401);
+            }
+            else {
+
+                let isValidUser = await db.collection('users').findOne({ refresher: String(req.cookies?.Bearer) });
 
 
                 if (isValidUser === null) {
@@ -67,10 +69,10 @@ router.route('/')
                     }
                 }
 
-            } catch (error) {
-                console.log(error);
-                res?.sendStatus(500);
             }
+        } catch (error) {
+            console.log(error);
+            res?.sendStatus(500);
         }
     })
 

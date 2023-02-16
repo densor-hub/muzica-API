@@ -5,18 +5,19 @@ const { ObjectId } = require('mongodb');
 router.route('/')
 
     .post(async (req, res) => {
-        if (!(req?.isAuthenticated())) {
-            res.sendStatus(401);
-        }
-        else {
-
-
-            if (!req?.body || !req?.body?.biography || req?.body?.biography?.length < 100) {
-                res.sendStatus(405);
+        try {
+            if (!(req?.cookies?.Bearer)) {
+                res.sendStatus(401);
             }
             else {
-                try {
-                    let isValidUser = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
+
+
+                if (!req?.body || !req?.body?.biography || req?.body?.biography?.length < 100) {
+                    res.sendStatus(405);
+                }
+                else {
+
+                    let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
                     if (isValidUser === null) {
                         res.sendStatus(403)
                     }
@@ -30,24 +31,7 @@ router.route('/')
                                     if (req?.body?.not_current_content) {
                                         res?.sendStatus(200);
                                     }
-                                    else {
-                                        let existingCurrentContent = await db.collection('currentconent')?.findOne({ userId: isValidUser?._id });
 
-                                        if (existingCurrentContent !== null) {
-                                            db.collection('currentconent')?.replaceOne({ _id: existingCurrentContent?._id }, { _id: existingCurrentContent?._id, userId: existingCurrentContent?.userId, currentContent: 'biography', submitted: 'biography' }).then(() => {
-                                                res?.sendStatus(200);
-                                            }
-                                            )
-                                        } else {
-                                            db.collection('currentconent')?.insertOne({ userId: isValidUser?._id, currentContent: "biography", submitted: "biography" }).then((results) => {
-                                                if (results?.insertedId) {
-                                                    res.sendStatus(200);
-                                                } else {
-                                                    res?.sendStatus(204)
-                                                }
-                                            })
-                                        }
-                                    }
                                 } else {
                                     res.sendStatus(204);
                                 }
@@ -86,11 +70,11 @@ router.route('/')
                         }
 
                     }
-                } catch (error) {
-                    console.log(error);
-                    res?.sendStatus(500);
                 }
             }
+        } catch (error) {
+            console.log(error);
+            res?.sendStatus(500);
         }
     })
 

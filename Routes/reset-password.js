@@ -9,14 +9,15 @@ require('dotenv')?.config();
 
 router?.route('/')
     ?.get(async (req, res) => {
-        if (req?.isAuthenticated()) {
-            let isValidUser = await db.collection('users')?.findOne({ _id: ObjectId(req?.session?.passport?.user) });
+        try {
+            if (req?.cookies?.Bearer) {
+                let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
 
-            if (isValidUser === null || isValidUser === undefined) {
-                res?.sendStatus(403);
-            }
-            else {
-                try {
+                if (isValidUser === null || isValidUser === undefined) {
+                    res?.sendStatus(403);
+                }
+                else {
+
                     if (isValidUser?.googleId !== "" && isValidUser?.googleId !== undefined && isValidUser?.googleId !== null) {
                         if (isValidUser?.password === null) {
                             res?.status(200)?.json({ loginWithNoPassword: true });
@@ -27,26 +28,28 @@ router?.route('/')
                     } else {
                         res?.status(200)?.json({ loginWithNoPassword: false });
                     }
-                } catch (error) {
-                    console.log(error)
-                    res?.sendStatus(500)
                 }
             }
-        }
-        else {
-            res?.sendStatus(401);
+            else {
+                res?.sendStatus(401);
+            }
+        } catch (error) {
+            console.log(error)
+            res?.sendStatus(500)
         }
     })
     ?.post(async (req, res) => {
 
-        if (!(req?.isAuthenticated())) {
+
+        if (!req?.cookies?.Bearer) {
             //no refresh token
             if (!req?.body.code && !req?.body?.password && !req?.body.confirmpassword && (req?.body?.username && req?.body?.username?.trim()?.length > 0)) {
                 try {
 
 
                     let isValidUser = await db.collection('users')?.findOne({ username: removeWhiteSpaces(req?.body?.username) });
-                    if (isValidUser !== null || isValidUser !== undefined) {
+
+                    if (isValidUser !== null && isValidUser !== undefined) {
                         let CodeExists = await db.collection('verificationcode')?.findOne({ userId: isValidUser?._id });
 
                         let verficationCodeArray = [];
@@ -72,7 +75,7 @@ router?.route('/')
                         }
 
                         if (verficationCode.length === 6) {
-                            console.log(isValidUser?.email)
+
                             let transporter = nodeMailer?.createTransport({
                                 service: 'gmail',
                                 port: 465,
@@ -128,6 +131,8 @@ router?.route('/')
                         } else {
                             res?.sendStatus(405)
                         };
+                    } else {
+                        res?.sendStatus(404);
                     }
                 } catch (error) {
                     console.log(error);
@@ -137,9 +142,6 @@ router?.route('/')
 
             else if (req?.body.code && req?.body?.code !== "" && req?.body?.password && req?.body?.password !== "" && req?.body?.confirmpassword && req?.body?.confirmpassword !== "" && req?.body?.password !== undefined && (req?.body?.confirmpassword === req?.body?.password) && ((includes.includesNumbers(req?.body?.password) && includes.includesUpperCase(req?.body?.password) && includes.includesLowerCase(req?.body?.password)) || (includes.includesSymbols(req?.body?.password) && includes.includesUpperCase(req?.body?.password) && includes.includesLowerCase(req?.body?.password)) || (includes.includesNumbers(req?.body?.password) && includes.includesUpperCase(req?.body?.password) && includes.includesLowerCase(req?.body?.password) && includes.includesSymbols(req?.body?.password)))) {
                 try {
-
-                    console.log('Passed')
-                    console.log(req?.body?.code)
 
                     let CodeExists = await db.collection('verificationcode')?.findOne({ code: removeWhiteSpaces(req?.body?.code.trim()) });
 
@@ -189,7 +191,7 @@ router?.route('/')
                 res?.sendStatus(401);
             }
         }
-        else if (req?.isAuthenticated()) {
+        else if (req?.cookies?.Bearer) {
             let allSet = false;
             if (req?.previousPassword) {
                 if (!req?.body?.newPassword || !req?.body?.confirmNewPassword || !req?.body?.previousPassword || (req?.body?.confirmNewPassword !== req?.body?.newPassword) || (req?.body?.newPassword === req?.body?.previousPassword)) {
@@ -210,7 +212,7 @@ router?.route('/')
             if (allSet) {
                 try {
 
-                    let isValidUser = await db.collection('users').findOne({ _id: ObjectId(req?.session.passport?.user) });
+                    let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
 
                     if (isValidUser === null) {
                         res.sendStatus(403)
@@ -226,7 +228,7 @@ router?.route('/')
                             if (isValidUser?.password === null || isValidUser?.password === undefined || isValidUser?.password === "") {
                                 await bcrypt.hash(req?.body.newPassword, 10).then((resulst) => {
                                     if (resulst !== null && resulst !== undefined) {
-                                        db.collection('users')?.replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: resulst, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser?.googleId }).then((results) => {
+                                        db.collection('users')?.replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: resulst, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser?.googleId, refresher: isValidUser?.refresher }).then((results) => {
                                             if (results?.matchedCount > 0) {
                                                 res?.sendStatus(200);
                                             }
@@ -239,7 +241,7 @@ router?.route('/')
                                 if (validOldPassword) {
                                     await bcrypt?.hash(req?.body?.newPassword, 10).then((results) => {
                                         if (results !== null && results !== undefined) {
-                                            db.collection('users')?.replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: results, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser.googleId }).then((results) => {
+                                            db.collection('users')?.replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: results, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser.googleId, refresher: isValidUser?.refresher }).then((results) => {
                                                 if (results?.matchedCount > 0) {
                                                     res?.sendStatus(200);
                                                 }
