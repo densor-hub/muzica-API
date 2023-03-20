@@ -16,7 +16,7 @@ const PORT = 3500;
 const server = express();
 
 server.use(cors({
-    origin: ['http://localhost:3000', 'http://44.214.6.245:3000', 'http://ec2-44-214-6-245.compute-1.amazonaws.com:3500'],
+    origin: ['http://localhost:3000', 'http://44.203.228.254:3000', 'http://ec2-44-203-228-254.compute-1.amazonaws.com:3000'],
     credentials: true,
 }))
 
@@ -42,15 +42,9 @@ connectToDb((err) => {
 //pulic
 server.use('/register', require('./Routes/registerUser'));
 server.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 server.use('/sign-in/local', require('./Routes/loginJWT'));
-
 server.use('/refresh', require('./Routes/refreshJWT'));
-
 server.use('/sign-in/google', require('./Routes/auth0google'));
-
-
-
 
 //before verify jwt since there is a posibility of changing username 
 server?.use('/user', require('./Routes/user-settings-Route'));
