@@ -58,12 +58,12 @@ router.route('/')
                                 res.sendStatus(405);
                             }
                             else {
-                                if (req?.files?.file?.size > (3 * 1024 * 1024)) {
+                                if (req?.files?.file?.size > (5 * 1024 * 1024)) {
                                     res.sendStatus(405);
                                 }
                                 else {
                                     if (isValidUser?.profilePicture !== "") {
-                                        let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname);
+                                        let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname?.split('api')[1]);
 
                                         if (fileSystem.existsSync(ExitingDpfilePath)) {
                                             fileSystem?.unlink(ExitingDpfilePath, () => {
@@ -139,8 +139,6 @@ router.route('/')
                 res.sendStatus(401);
             }
             else {
-
-
                 isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
                 if (isValidUser === null) {
@@ -149,7 +147,7 @@ router.route('/')
                 else {
                     if (req?.body?.action === "DP") {
                         if (isValidUser?.profilePicture !== "") {
-                            let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname);
+                            let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname?.split('api')[1]);
 
                             if (fileSystem.existsSync(ExitingDpfilePath)) {
                                 fileSystem?.unlink(ExitingDpfilePath, () => {
@@ -167,18 +165,14 @@ router.route('/')
                                     if (results?.matchedCount > 0) {
                                         res.status(200).json({ "accessToken": isValidUser?.refresher, "stagename": `${isValidUser.stagename}`, "profilePicture": "", stagenameInUrl: create_Username_url(isValidUser?.stagename), websiteCreated: isValidUser?.websiteCreated });
                                     }
-
                                 });
                             }
-
-
                         }
                         else {
                             res?.sendStatus(405);
                         }
                     }
                 }
-
             }
         } catch (error) {
             console.log(error);
@@ -197,13 +191,13 @@ const SetNewImage = (req, res, isValidUser) => {
             else {
 
                 //cpudp- compressed user diaplay picture
-                sharp(filePath).resize(200, 200)?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cpudp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                sharp(filePath).resize(200, 200)?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
                     if (fileSystem?.existsSync(filePath)) {
                         fileSystem?.unlink(filePath, () => {
                         })
                     }
 
-                    const imageURL = `${req.protocol}:${req.url + req.url}${req.get('host')}${req.url}uploads${req.url}${identifier}-cpudp.${req.files.file.mimetype.split('/')[1]}`;
+                    const imageURL = `${req.protocol}:${req.url + req.url}${req.get('host')}/api/uploads${req.url}${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`;
 
 
                     db.collection('users').replaceOne({ _id: isValidUser._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: isValidUser?.password, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: imageURL, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser?.googleId, refresher: isValidUser?.refresher }).then((results) => {

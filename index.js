@@ -16,7 +16,7 @@ const PORT = 3500;
 const server = express();
 
 server.use(cors({
-    origin: ['http://localhost:3000', 'http://44.203.228.254:3000', 'http://ec2-44-203-228-254.compute-1.amazonaws.com:3000'],
+    origin: ['http://localhost:3000', 'http://muzica.goldcoastuni.com.s3-website-us-east-1.amazonaws.com/'],
     credentials: true,
 }))
 
@@ -40,39 +40,39 @@ connectToDb((err) => {
 
 
 //pulic
-server.use('/register', require('./Routes/registerUser'));
-server.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-server.use('/sign-in/local', require('./Routes/loginJWT'));
-server.use('/refresh', require('./Routes/refreshJWT'));
-server.use('/sign-in/google', require('./Routes/auth0google'));
+server.use('/api/register', require('./Routes/registerUser'));
+server.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
+server.use('/api/sign-in/local', require('./Routes/loginJWT'));
+server.use('/api/refresh', require('./Routes/refreshJWT'));
+server.use('/api/sign-in/google', require('./Routes/auth0google'));
 
 //before verify jwt since there is a posibility of changing username 
-server?.use('/user', require('./Routes/user-settings-Route'));
+server?.use('/api/user', require('./Routes/user-settings-Route'));
 
-server?.use('/reset-password', require('./Routes/reset-password'));
+server?.use('/api/reset-password', require('./Routes/reset-password'));
 
 server?.use(VerifyURLparams);
 
 //protected
 server.use(VerifyJWT);
-server.use('/save-audio', require('./Routes/saveAudio'));
-server.use('/save-video', require('./Routes/saveVideo'));
-server.use('/save-image', require('./Routes/saveImage'));
-server.use('/save-upcoming', require('./Routes/saveUpcoming'));
-server.use('/save-news', require('./Routes/saveNews'));
-server.use('/save-biography', require('./Routes/saveBiography'));
-server.use('/save-social-media-platforms', require('./Routes/saveSocialmedia'));
-server.use('/save-bookings', require('./Routes/saveBookings'));
-server.use('/create-website', require('./Routes/createWebsite'));
-server.use('/current-content', require('./Routes/currentContent'));
-server.use('/get-added-audios', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-videos', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-images', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-upcoming', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-news', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-biography', require('./Middleware/getUplodtedItems'));
-server.use('/get-added-socialmedia', require('./Middleware/getUplodtedItems'));
-server.use('/logout', require('./Routes/signOutJWT'))
+server.use('/api/save-audio', require('./Routes/saveAudio'));
+server.use('/api/save-video', require('./Routes/saveVideo'));
+server.use('/api/save-image', require('./Routes/saveImage'));
+server.use('/api/save-upcoming', require('./Routes/saveUpcoming'));
+server.use('/api/save-news', require('./Routes/saveNews'));
+server.use('/api/save-biography', require('./Routes/saveBiography'));
+server.use('/api/save-social-media-platforms', require('./Routes/saveSocialmedia'));
+server.use('/api/save-bookings', require('./Routes/saveBookings'));
+server.use('/api/create-website', require('./Routes/createWebsite'));
+server.use('/api/current-content', require('./Routes/currentContent'));
+server.use('/api/get-added-audios', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-videos', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-images', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-upcoming', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-news', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-biography', require('./Middleware/getUplodtedItems'));
+server.use('/api/get-added-socialmedia', require('./Middleware/getUplodtedItems'));
+server.use('/api/logout', require('./Routes/signOutJWT'))
 
 
 server?.use(verifySearch);
@@ -81,5 +81,9 @@ server?.use(SingleItem)
 
 
 
-
+//note
+//images identifications
+//AUDIO COVER ARTS -------> caca - compressed audio cover art (200x200)
+//IMAGES -----------------> c-img - compressed image (500x500)
+//PROFILE OR DISPLAY PICTURES -> cdp - compressed display picture
 

@@ -3,6 +3,7 @@ const fileSystem = require('fs');
 const removeWhiteSpaces = require('../FNS/removeWhiteSpaces');
 const path = require('path');
 const dateValidator = require('../FNS/DurationValidator');
+const sharp = require('sharp');
 
 const SingleItem = async (req, res, next) => {
 
@@ -69,46 +70,65 @@ const SingleItem = async (req, res, next) => {
                                         })
                                     }
                                     else if (req?.files !== null) {
-                                        if (req?.files?.file?.size > (3 * 1024 * 1024)) {
+                                        if (req?.files?.file?.size > (5 * 1024 * 1024)) {
                                             res.sendStatus(405);
                                         }
                                         else {
+
                                             let identifier = `${removeWhiteSpaces(req.body.title.toLowerCase())}${Date.now()}`;
                                             let ExistingFilePath = `${path.join(__dirname, '../uploads')}/${selectedItem?.coverart?.split('/uploads/')[1]}`;
-                                            let newfilePath = `${path.join(__dirname, '../uploads')}/${identifier}.${req.files.file.mimetype.split('/')[1]}`
 
-                                            if (fileSystem?.existsSync(ExistingFilePath)) {
+                                            if (fileSystem.existsSync(ExistingFilePath)) {
                                                 fileSystem?.unlink(ExistingFilePath, () => {
+                                                    console.log('existing file deleted')
                                                 })
                                             }
 
-                                            try {
-                                                req.files.file.mv(newfilePath, (error) => {
-                                                    if (error) {
-                                                        res.sendStatus(500)
-                                                    }
-                                                    else {
-                                                        const imageURL = `${req.protocol}://${req.get('host')}/uploads/${identifier}.${req.files.file.mimetype.split('/')[1]}`;
+                                            let newfilePath = `${path.join(__dirname, '../uploads')}/${identifier}.${req.files.file.mimetype.split('/')[1]}`;
 
-                                                        db.collection(querry)?.replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, title: req?.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then((results) => {
-                                                            if (results?.matchedCount > 0) {
-                                                                res.sendStatus(200)
-                                                            }
-                                                            else {
-                                                                if (fileSystem.existsSync(newfilePath)) {
-                                                                    fileSystem.unlink(newfilePath, () => {
-                                                                        res.sendStatus(500);
-                                                                    });
+                                            req.files.file.mv(newfilePath, (error) => {
+                                                if (error) {
+                                                    res.sendStatus(500)
+                                                }
+                                                else {
+                                                    sharp(newfilePath)?.resize(200, 200, { fit: "cover" })?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+
+                                                        if (results) {
+                                                            const imageURL = `${req.protocol}://${req.get('host')}/api/uploads/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
+
+                                                            db.collection(querry)?.replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, title: req?.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then((results) => {
+                                                                if (results?.matchedCount > 0) {
+                                                                    if (fileSystem?.existsSync(newfilePath)) {
+                                                                        fileSystem?.unlink(newfilePath, (error) => {
+                                                                            if (error) {
+                                                                                throw error
+                                                                            }
+                                                                            else {
+                                                                                res?.sendStatus(200)
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                    else {
+                                                                        res.sendStatus(200)
+                                                                    }
                                                                 }
-                                                            }
-                                                        })
-                                                    }
-                                                })
-                                            }
-                                            catch (error) {
-                                                console.log(error);
-                                                res?.sendStatus(500);
-                                            }
+                                                                else {
+                                                                    if (fileSystem.existsSync(newfilePath)) {
+                                                                        fileSystem.unlink(newfilePath, () => {
+                                                                            res.sendStatus(500);
+                                                                        });
+                                                                    }
+                                                                }
+                                                            })
+                                                        }
+                                                    })
+
+                                                }
+                                            })
+
+
+
+
 
                                         }
                                     }
@@ -166,11 +186,18 @@ const SingleItem = async (req, res, next) => {
                             }
                         }
                     } else if (req?.method === "PUT" && isValidUser !== null && isValidUser !== undefined) {
+
                         if (selectedItem !== null && selectedItem !== undefined) {
                             if (querry === 'audios' || querry === 'images') {
                                 db.collection(querry).deleteOne({ _id: selectedItem?._id }).then((results) => {
                                     if (results?.deletedCount > 0) {
-                                        let ExistingFilePath = `${path.join(__dirname, '../uploads')}/${selectedItem?.coverart?.split('/uploads/')[1]}`;
+                                        let ExistingFilePath;
+                                        if (querry === 'audios') {
+                                            ExistingFilePath = `${path.join(__dirname, '../uploads')}/${selectedItem?.coverart?.split('/uploads/')[1]}`;
+                                        } else if (querry === 'images') {
+
+                                            ExistingFilePath = `${path.join(__dirname, '../uploads')}/${selectedItem?.image?.split('/uploads/')[1]}`;
+                                        }
 
                                         if (fileSystem?.existsSync(ExistingFilePath)) {
                                             fileSystem?.unlink(ExistingFilePath, () => {

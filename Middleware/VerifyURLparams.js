@@ -47,8 +47,6 @@ const VerifyURLparams = (async (req, res, next) => {
 
                                     if (create_Username_url(isValidUserWebsite?.stagename?.trim()?.toLowerCase()) !== artiste?.trim()?.toLowerCase()) {
 
-                                        console.log('Thisss farrr');
-
                                         res.sendStatus(404)
                                     }
                                     else {

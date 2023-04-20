@@ -5,6 +5,7 @@ const removeWhiteSpaces = require('../FNS/removeWhiteSpaces');
 const { ObjectId } = require('mongodb');
 const { isValidDate } = require('../FNS/DurationValidator');
 const sharp = require('sharp');
+//const CompressImage = require('../Middleware/compressImage');
 
 
 
@@ -37,24 +38,29 @@ router.route('/')
                             res.sendStatus(405);
                         }
                         else {
-                            if (req?.files?.file?.size > (3 * 1024 * 1024)) {
+                            if (req?.files?.file?.size > (5 * 1024 * 1024)) {
                                 res.sendStatus(405);
                             }
                             else {
                                 let identifier = `${removeWhiteSpaces(req.body.title.toLowerCase())}${Date.now()}`;
-                                let filePath = `${path.join(__dirname, '../uploads')}${req.url}${identifier}.${req.files.file.mimetype.split('/')[1]}`
+                                let filePath = `${path.join(__dirname, '../uploads')}${req.url}${identifier}.${req.files.file.mimetype.split('/')[1]}`;
+
+                                // await CompressImage(req?.files?.file, req?.body?.title).then((results) => {
+                                //     console.log('RESULTSSSSS')
+                                //     console.log("results")
+                                // })
 
                                 req.files.file.mv(filePath, (error) => {
                                     if (error) {
                                         res.sendStatus(500)
                                     }
                                     else {
-                                        sharp(filePath)?.resize(200, 200)?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cpcr.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                                        sharp(filePath)?.resize(200, 200, { fit: "cover" })?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
 
                                             if (results) {
-                                                //cpcr - compressed audio cover art
+                                                //caca - compressed audio cover art
                                                 fileSystem?.unlink(filePath, () => {
-                                                    const imageURL = `${req.protocol}://${req.get('host')}${req.url}uploads${req.url}${identifier}-cpcr.${req.files.file.mimetype.split('/')[1]}`;
+                                                    const imageURL = `${req.protocol}://${req.get('host')}/api/uploads${req.url}${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
 
                                                     db.collection('audios').insertOne({ userId: isValidUser._id, title: req.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then(async (results) => {
 
