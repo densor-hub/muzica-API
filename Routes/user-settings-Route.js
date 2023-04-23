@@ -14,12 +14,12 @@ const router = require('express').Router();
 router.route('/')
     .get(async (req, res) => {
         try {
-            if (!(req.cookies?.Bearer)) {
+            if (!(req.isAuthenticated())) {
                 res.sendStatus(401);
             }
             else {
 
-                let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
+                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
 
                 if (isValidUser === null) {
                     res.sendStatus(403)
@@ -37,12 +37,12 @@ router.route('/')
 
     .post(async (req, res) => {
         try {
-            if (!(req?.cookies?.Bearer)) {
+            if (!(req?.isAuthenticated())) {
                 res.sendStatus(401);
             }
             else {
 
-                let isValidUser = await db.collection('users').findOne({ refresher: req.cookies?.Bearer });
+                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
 
                 if (isValidUser === null) {
                     res.sendStatus(403)
@@ -135,11 +135,11 @@ router.route('/')
     .put(async (req, res) => {
         try {
 
-            if (!req?.cookies?.Bearer) {
+            if (!req?.isAuthenticated()) {
                 res.sendStatus(401);
             }
             else {
-                isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
+                isValidUser = await db.collection('users').findOne({ _id: req?.user });
 
                 if (isValidUser === null) {
                     res.sendStatus(403)
@@ -191,7 +191,7 @@ const SetNewImage = (req, res, isValidUser) => {
             else {
 
                 //cpudp- compressed user diaplay picture
-                sharp(filePath).resize(200, 200)?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                sharp(filePath).resize(200, 200, { fit: "cover", fastShrinkOnLoad: true })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
                     if (fileSystem?.existsSync(filePath)) {
                         fileSystem?.unlink(filePath, () => {
                         })

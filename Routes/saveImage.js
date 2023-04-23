@@ -11,11 +11,11 @@ const sharp = require('sharp');
 router.route('/')
     .post(async (req, res) => {
         try {
-            if (!(req?.cookies?.Bearer)) {
+            if (!(req?.isAuthenticated())) {
                 res.sendStatus(401);
             }
             else {
-                let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
+                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
 
                 if (isValidUser === null) {
                     res.sendStatus(403)
@@ -37,7 +37,7 @@ router.route('/')
                                     throw error;
                                 }
                                 else {
-                                    sharp(filePath)?.resize(500, 500, { fit: "inside", background: "rgb(0,0,0,0.1)", fastShrinkOnLoad: true })?.toFile(`${path?.join(__dirname, '..', 'uploads')}/${identifier}-c-img.${req.files?.file?.mimetype?.split('/')[1]}`).then(() => {
+                                    sharp(filePath)?.resize(500, 500, { fit: "inside", fastShrinkOnLoad: true })?.withMetadata()?.toFile(`${path?.join(__dirname, '..', 'uploads')}/${identifier}-c-img.${req.files?.file?.mimetype?.split('/')[1]}`).then(() => {
                                         const imageURL = `${req.protocol}:${req.url + req.url}${req.get('host')}/api/uploads${req.url}${identifier}-c-img.${req.files.file.mimetype.split('/')[1]}`;
 
                                         db.collection('images').insertOne({ userId: isValidUser._id, image: imageURL }).then(async (results) => {
