@@ -91,7 +91,7 @@ const SingleItem = async (req, res, next) => {
                                                     res.sendStatus(500)
                                                 }
                                                 else {
-                                                    sharp(newfilePath)?.resize(200, 200, { fit: "cover" })?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                                                    sharp(newfilePath)?.resize(200, 200, { fit: "cover" })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
 
                                                         if (results) {
                                                             const imageURL = `${req.protocol}://${req.get('host')}/api/uploads/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
@@ -125,11 +125,6 @@ const SingleItem = async (req, res, next) => {
 
                                                 }
                                             })
-
-
-
-
-
                                         }
                                     }
                                 }

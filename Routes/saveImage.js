@@ -37,7 +37,7 @@ router.route('/')
                                     throw error;
                                 }
                                 else {
-                                    sharp(filePath)?.resize(500, 500, { fit: "inside", background: "rgb(0,0,0,0.1)", fastShrinkOnLoad: true })?.toFile(`${path?.join(__dirname, '..', 'uploads')}/${identifier}-c-img.${req.files?.file?.mimetype?.split('/')[1]}`).then(() => {
+                                    sharp(filePath)?.resize(500, 500, { fit: "inside", background: "rgb(0,0,0,0.1)", fastShrinkOnLoad: true })?.withMetadata()?.toFile(`${path?.join(__dirname, '..', 'uploads')}/${identifier}-c-img.${req.files?.file?.mimetype?.split('/')[1]}`).then(() => {
                                         const imageURL = `${req.protocol}:${req.url + req.url}${req.get('host')}/api/uploads${req.url}${identifier}-c-img.${req.files.file.mimetype.split('/')[1]}`;
 
                                         db.collection('images').insertOne({ userId: isValidUser._id, image: imageURL }).then(async (results) => {

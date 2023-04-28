@@ -191,7 +191,7 @@ const SetNewImage = (req, res, isValidUser) => {
             else {
 
                 //cpudp- compressed user diaplay picture
-                sharp(filePath).resize(200, 200)?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                sharp(filePath).resize(200, 200)?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
                     if (fileSystem?.existsSync(filePath)) {
                         fileSystem?.unlink(filePath, () => {
                         })

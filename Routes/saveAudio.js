@@ -55,7 +55,7 @@ router.route('/')
                                         res.sendStatus(500)
                                     }
                                     else {
-                                        sharp(filePath)?.resize(200, 200, { fit: "cover" })?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                                        sharp(filePath)?.resize(200, 200, { fit: "cover" })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
 
                                             if (results) {
                                                 //caca - compressed audio cover art
