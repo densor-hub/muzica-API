@@ -16,7 +16,7 @@ const PORT = 3500;
 const server = express();
 
 server.use(cors({
-    origin: ['http://localhost:3000', 'http://muzica.goldcoastuni.com.s3-website-us-east-1.amazonaws.com/'],
+    origin: ['http://localhost:3000'],
     credentials: true,
 }))
 

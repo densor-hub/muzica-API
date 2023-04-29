@@ -52,7 +52,7 @@ router.route('/')
                                 .then((noError) => {
                                     if (noError) {
                                         //send http only refresh cookie
-                                        res.cookie("Bearer ", refreshToken, { httpOnly: true, secure: true, domain: '', maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax' });
+                                        res.cookie("Bearer ", refreshToken, { httpOnly: true, secure: true, domain: 'localhost', maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax' });
 
                                         //send requisite auth  values
                                         res.status(200).json({ "accessToken": accesToken, "stagename": `${UserExists.stagename}`, "profilePicture": UserExists.profilePicture, stagenameInUrl: create_Username_url(UserExists?.stagename), websiteCreated: UserExists?.websiteCreated })
