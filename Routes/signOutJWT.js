@@ -5,13 +5,11 @@ router.route('/')
     .get(async (req, res) => {
 
         try {
-            if (!req?.cookies?.Bearer) {
+            if (!req?.isAuthenticated()) {
                 res.sendStatus(200);
             }
             else {
-
-
-                let UserExists = await db.collection('users').findOne({ refresher: String(req.cookies.Bearer) });
+                let UserExists = await db.collection('users').findOne({ _id: req?.user });
 
                 if (UserExists !== null) {
                     db.collection("users").replaceOne({ _id: UserExists._id }, { _id: UserExists._id, username: UserExists.username, password: UserExists.password, fullname: UserExists.fullname, gender: UserExists.gender, stagename: UserExists.stagename, profilePicture: UserExists.profilePicture, email: UserExists?.email, websiteCreated: UserExists?.websiteCreated, googleId: UserExists?.googleId, refresher: "" }).then((results) => {

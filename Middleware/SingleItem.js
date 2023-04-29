@@ -10,14 +10,13 @@ const SingleItem = async (req, res, next) => {
     let isValidUser;
     let selectedItem, querry;
 
-    if (!req?.cookies?.Bearer) {
+    if (!req?.user) {
         res?.sendStatus(401);
     }
     else {
         try {
 
-            isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
-
+            isValidUser = await db.collection('users').findOne({ _id: req?.user });
 
             if (isValidUser !== null && isValidUser !== undefined) {
 
@@ -58,7 +57,6 @@ const SingleItem = async (req, res, next) => {
                                 }
                                 else {
                                     if (req?.files === null) {
-
                                         db.collection(querry)?.replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, title: req?.body?.title, coverart: req?.body?.coverart, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: req?.body?.uniqueId }).then((results) => {
                                             console.log(results)
                                             if (results?.matchedCount > 0) {
@@ -74,7 +72,6 @@ const SingleItem = async (req, res, next) => {
                                             res.sendStatus(405);
                                         }
                                         else {
-
                                             let identifier = `${removeWhiteSpaces(req.body.title.toLowerCase())}${Date.now()}`;
                                             let ExistingFilePath = `${path.join(__dirname, '../uploads')}/${selectedItem?.coverart?.split('/uploads/')[1]}`;
 

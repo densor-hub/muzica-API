@@ -13,7 +13,7 @@ router.route('/')
 
     .post(async (req, res) => {
         try {
-            if (!(req?.cookies?.Bearer)) {
+            if (!(req?.isAuthenticated())) {
                 res.sendStatus(401);
             }
             else {
@@ -28,9 +28,10 @@ router.route('/')
                 }
                 else {
 
-                    let isValidUser = await db.collection('users').findOne({ refresher: String(req?.cookies?.Bearer) });
+                    let isValidUser = await db.collection('users').findOne({ _id: req.user });
 
                     if (isValidUser === null) {
+                        console.log(403)
                         res.sendStatus(403)
                     }
                     else {
