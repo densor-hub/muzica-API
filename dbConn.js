@@ -9,7 +9,7 @@ let dbConnection;
 module.exports = {
     connectToDb: ((callBack) => {
         try {
-            MongoClient.connect(localCluster)
+            MongoClient.connect(onlineCluster)
                 .then((client) => {
                     dbConnection = client.db();
                     console.log('connected to database')
