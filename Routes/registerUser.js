@@ -118,12 +118,14 @@ router.route('/')
                 }
             } else if (req?.body?.code) {
                 if (req?.body?.code?.trim().length < 6) {
+                    console.log('herererererer')
                     res?.sendStatus(405);
                 }
                 else {
 
 
                     if (!(includes?.includesLowerCase(req?.body?.code) && includes?.includesNumbers(req?.body?.code) && includes?.includesUpperCase(req?.body?.code))) {
+                        console.log('herererererer')
                         res?.sendStatus(405);
                     }
                     else {

@@ -10,8 +10,8 @@ require('dotenv')?.config();
 router?.route('/')
     ?.get(async (req, res) => {
         try {
-            if (req?.isAuthenticated()) {
-                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
+            if (req?.cookies?.Bearer) {
+                let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
                 if (isValidUser === null || isValidUser === undefined) {
                     res?.sendStatus(403);
@@ -41,7 +41,7 @@ router?.route('/')
     ?.post(async (req, res) => {
 
 
-        if (!req?.isAuthenticated()) {
+        if (!req?.cookies?.Bearer) {
             //no refresh token
             if (!req?.body.code && !req?.body?.password && !req?.body.confirmpassword && (req?.body?.username && req?.body?.username?.trim()?.length > 0)) {
                 try {
@@ -191,7 +191,7 @@ router?.route('/')
                 res?.sendStatus(401);
             }
         }
-        else if (req?.isAuthenticated()) {
+        else if (req?.cookies?.Bearer) {
             let allSet = false;
             if (req?.previousPassword) {
                 if (!req?.body?.newPassword || !req?.body?.confirmNewPassword || !req?.body?.previousPassword || (req?.body?.confirmNewPassword !== req?.body?.newPassword) || (req?.body?.newPassword === req?.body?.previousPassword)) {
@@ -212,7 +212,7 @@ router?.route('/')
             if (allSet) {
                 try {
 
-                    let isValidUser = await db.collection('users').findOne({ _id: req?.user });
+                    let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
                     if (isValidUser === null) {
                         res.sendStatus(403)

@@ -1,30 +1,39 @@
 const jwt = require('jsonwebtoken');
+const VerifyFrontendPath = require('./verifyFrontEndPath');
 require("dotenv").config();
+
+
 
 const VerifyJWT = (req, res, next) => {
     const authHeader = req.headers['Authorization'] || req.headers['authorization'];
+    console.log('HERERER')
 
-    if (!authHeader) {
-        res.sendStatus(401);
+    if (!req?._parsedUrl?.path.includes('api/')) {
+        VerifyFrontendPath()
     }
-    else if (authHeader) {
-        let token = authHeader.split(" ")[1];
+    else {
+        if (authHeader) {
+            let token = authHeader.split(" ")[1];
 
-        jwt.verify(
-            token,
-            process.env.ACCESS_TOKEN_SECRET,
-            (err, decoded) => {
-                if (err) {
-                    console.log(err.message);
-                    res.sendStatus(401);
-                }
-                else {
+            jwt.verify(
+                token,
+                process.env.ACCESS_TOKEN_SECRET,
+                (err, decoded) => {
+                    if (err) {
+                        console.log(err.message);
+                        res.sendStatus(401);
+                    }
+                    else {
+                        next();
+                    }
+                })
 
-                    next();
-                }
-            })
-
+        } else {
+            res?.sendStatus(401);
+        }
     }
+
+
 }
 
 module.exports = VerifyJWT;

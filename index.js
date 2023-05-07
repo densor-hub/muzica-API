@@ -4,44 +4,28 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
-const session = require('express-session');
-const create_Username_url = require('./FNS/create-usernameInUrl')
 require('dotenv')?.config;
 
 const VerifyURLparams = require('./Middleware/VerifyURLparams');
-//const VerifyJWT = require('./Middleware/verifJWT')
-const VerifyUserIsAuthenticated = require('./Middleware/verifyPassportLoggedIn');
+const VerifyJWT = require('./Middleware/verifJWT');
 const verifySearch = require('./Middleware/verifySearch');
 const SingleItem = require('./Middleware/SingleItem');
+const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
 
-const initializePassport = require('./Middleware/passportLocal');
-const passport = require('passport');
-initializePassport(passport)
 
 const PORT = 3500;
 
 const server = express();
 
+//provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(cors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://ec2-44-195-78-198.compute-1.amazonaws.com:3000'],
     credentials: true,
 }))
-
-
 
 server.use(cookieParser());
 server.use(express.json());
 server.use(fileUpload());
-
-server.use(session({
-    secret: process?.env?.REFRESH_TOKEN_SECRET,
-    resave: false,
-    saveUninitialized: false
-}))
-server.use(passport.initialize());
-server.use(passport.session())
-
-
 
 //db connection
 connectToDb((err) => {
@@ -54,32 +38,25 @@ connectToDb((err) => {
 })
 
 
+
 //pulic
 server.use('/api/register', require('./Routes/registerUser'));
 server.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
+//servinf front end
+server.use('/', express.static(path.join(__dirname, 'build')));
+server.use(VerifyFrontendPath);
+
+
 //login process
-server.use('/api/sign-in/local', passport.authenticate('local', {
-    successRedirect: '/api/login-successful',
-    failureRedirect: '/api/login-failed'
-}));
+server.use('/api/sign-in/local', require('./Routes/loginJWT'));
 
-server.get('/api/login-successful', async (req, res) => {
-    if (req?.isAuthenticated()) {
-        let UserExists = await db.collection("users").findOne({ _id: req?.user })
-
-        //send requisite auth  values
-        res.status(200).json({ isAuthenticated: req?.isAuthenticated(), "stagename": `${UserExists.stagename}`, "profilePicture": UserExists.profilePicture, stagenameInUrl: create_Username_url(UserExists?.stagename), websiteCreated: UserExists?.websiteCreated })
-    }
-})
-
-server.get('/api/login-failed', (req, res) => {
-    res?.sendStatus(405);
-})
+//signout route before authentication verification because user could access whiles not authenticated and user must be directed to login page which that happens
+server.use('/api/logout', require('./Routes/signOutJWT'));
 
 
-
-server.use('/api/refresh', require('./Routes/refreshPassportLocal'));
+server.use('/api/refresh', require('./Routes/refreshJWT'));
 server.use('/api/sign-in/google', require('./Routes/auth0google'));
 
 //before verify jwt since there is a posibility of changing username 
@@ -89,11 +66,9 @@ server?.use('/api/reset-password', require('./Routes/reset-password'));
 
 server?.use(VerifyURLparams);
 
-//signout route before authentication verification because user could access whiles not authenticated and user must be directed to login page which that happens
-server.use('/api/logout', require('./Routes/signOutPassportLocal'));
 
 //protected
-server.use(VerifyUserIsAuthenticated);
+server.use(VerifyJWT);
 server.use('/api/save-audio', require('./Routes/saveAudio'));
 server.use('/api/save-video', require('./Routes/saveVideo'));
 server.use('/api/save-image', require('./Routes/saveImage'));

@@ -5,12 +5,12 @@ router.route('/')
 
     .get(async (req, res) => {
         try {
-            if (!req?.isAuthenticated()) {
+            if (!req?.cookies?.Bearer) {
                 res.sendStatus(401);
             }
             else {
 
-                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
+                let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
                 if (isValidUser === null) {
                     res.sendStatus(401)
@@ -36,12 +36,12 @@ router.route('/')
     .post(async (req, res) => {
         try {
 
-            if (!req?.isAuthenticated()) {
+            if (!req?.cookies?.Bearer) {
                 res.sendStatus(401);
             }
             else {
 
-                let isValidUser = await db.collection('users').findOne({ _id: req?.user });
+                let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
 
                 if (isValidUser === null) {

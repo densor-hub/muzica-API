@@ -10,13 +10,12 @@ const SingleItem = async (req, res, next) => {
     let isValidUser;
     let selectedItem, querry;
 
-    if (!req?.user) {
+    if (!req?.cookies?.Bearer) {
         res?.sendStatus(401);
     }
     else {
         try {
-
-            isValidUser = await db.collection('users').findOne({ _id: req?.user });
+            isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
             if (isValidUser !== null && isValidUser !== undefined) {
 
