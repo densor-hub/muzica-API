@@ -2,6 +2,7 @@ const { ObjectId } = require('mongodb')
 
 const verifySearch = (async (req, res, next) => {
 
+
     if (!(String(req?.method) === String("POST"))) {
         next();
     }

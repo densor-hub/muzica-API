@@ -11,7 +11,6 @@ router.route('/')
         else {
             try {
 
-
                 let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
 
                 if (isValidUser === null) {

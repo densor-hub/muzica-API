@@ -19,7 +19,7 @@ const server = express();
 
 //provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(cors({
-    origin: ['http://ec2-44-195-78-198.compute-1.amazonaws.com:3500', 'http://localhost:3000'],
+    origin: ['http://localhost:3000'],
     credentials: true,
 }))
 
