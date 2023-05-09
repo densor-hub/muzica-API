@@ -101,8 +101,7 @@ router?.route('/')
 
                                         transporter?.sendMail(mailOptions, (error, success) => {
                                             if (error) {
-                                                console.log(error);
-                                                res?.sendStatus(502);
+                                                throw error
                                             }
                                             else if (success) {
                                                 res?.status(200).json({ email: isValidUser?.email });
@@ -114,7 +113,7 @@ router?.route('/')
                             }
                             else {
                                 await db.collection('verificationcode').insertOne({ userId: isValidUser?._id, code: verficationCode, timeStamp: Date.now() }).then((resulst) => {
-                                    console.log(resulst)
+
                                     if (resulst?.insertedId) {
                                         //use node mailer to send email
                                         transporter?.sendMail(mailOptions, (error, success) => {

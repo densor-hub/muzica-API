@@ -5,7 +5,6 @@ const DateValidator = require('../FNS/DurationValidator');
 router.route('/')
 
     .post(async (req, res) => {
-
         if (!req?.cookies?.Bearer) {
             res.sendStatus(401);
         }
@@ -55,7 +54,6 @@ router.route('/')
 
                                     if (results === null) {
                                         await db.collection('websitesCreated')?.insertOne({ userId: isValidUser?._id }).then((newWebsite) => {
-                                            console?.log(newWebsite)
                                             const websiteUrl = `${req?.body?.clientOrigin}${req.url}home?a=${createUsernameInURL(isValidUser?.stagename.toLowerCase())}&&id=${String(newWebsite?.insertedId)}`;
                                             res.status(200).send({ websiteUrl });
                                         }

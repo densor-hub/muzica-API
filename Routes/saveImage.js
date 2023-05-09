@@ -9,6 +9,7 @@ const sharp = require('sharp');
 
 
 router.route('/')
+
     .post(async (req, res) => {
         try {
             if (!(req?.cookies?.Bearer)) {

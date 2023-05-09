@@ -4,7 +4,7 @@ const DurationValidator = require('../FNS/DurationValidator')
 
 
 const getUploadedData = async (req, res, next) => {
-    console.log(req?.cookies?.Bearer)
+
     try {
         if (!req?.cookies?.Bearer) {
             res.sendStatus(401);
@@ -23,7 +23,6 @@ const getUploadedData = async (req, res, next) => {
                     next()
                 }
                 else {
-
 
                     if (isValidUser !== null && isValidUser !== undefined) {
                         let addedItems = await db.collection(`${querry}`).find({ userId: isValidUser?._id }).toArray();

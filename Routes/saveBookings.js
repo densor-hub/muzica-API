@@ -58,7 +58,7 @@ router?.route('/')
                         }
                         else {
                             await db.collection('bookings-info')?.replaceOne({ userId: isValidUser?._id }, { _id: alreadySubmittedBookingsInfo?._id, userId: isValidUser?._id, phone: req?.body?.phone, email: req?.body?.email })?.then(async (results) => {
-                                console?.log(results);
+
                                 if (results?.matchedCount > 0) {
                                     if (req?.body?.not_current_content) {
                                         res.sendStatus(200)

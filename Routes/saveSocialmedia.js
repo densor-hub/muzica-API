@@ -3,6 +3,7 @@ const router = require('express').Router();
 router.route('/')
 
     .post(async (req, res) => {
+
         if (!req?.cookies?.Bearer) {
             res.sendStatus(401);
         }

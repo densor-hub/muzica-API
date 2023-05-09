@@ -12,7 +12,8 @@ router.route('/')
                 res.sendStatus(401);
             }
             else {
-                if (!req?.body || !req?.body?.title || req?.body?.title?.length <= 0 || req?.body?.link?.length <= 0 || !req?.body?.link || !req?.body?.dateReleased || !isValidDate(req?.body?.dateReleased) || !new Date(req?.body?.dateReleased) || (!(req.body.link?.startsWith('https://') && new URL(req.body.link?.trim())?.origin?.toLowerCase().endsWith('youtube.com')))) {
+                if (!req?.body || !req?.body?.title || req?.body?.title?.length <= 0 || req?.body?.link?.length <= 0 || !req?.body?.link || !req?.body?.dateReleased || !isValidDate(req?.body?.dateReleased) || !new Date(req?.body?.dateReleased) || (req.body.link && !(req?.body?.link?.startsWith('https://') && ((new URL(req?.body?.link?.trim())?.origin?.toLowerCase().endsWith('youtube'?.toLowerCase() + ".com"))
+                    || (new URL(req?.body?.link)?.origin.endsWith(('youtube'?.toLowerCase()?.slice(0, 5) + '.' + 'youtube'?.trim().slice(5, 8))?.trim())))))) {
                     res?.sendStatus(405);
                 }
                 else {

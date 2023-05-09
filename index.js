@@ -10,7 +10,7 @@ const VerifyURLparams = require('./Middleware/VerifyURLparams');
 const VerifyJWT = require('./Middleware/verifJWT');
 const verifySearch = require('./Middleware/verifySearch');
 const SingleItem = require('./Middleware/SingleItem');
-const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
+//const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
 
 
 const PORT = 3500;
@@ -19,7 +19,7 @@ const server = express();
 
 //provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(cors({
-    origin: ['http://ec2-44-195-78-198.compute-1.amazonaws.com:3000'],
+    origin: ['http://ec2-44-195-78-198.compute-1.amazonaws.com:3500', 'http://localhost:3000'],
     credentials: true,
 }))
 
@@ -45,8 +45,8 @@ server.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 //servinf front end
-server.use('/', express.static(path.join(__dirname, 'build')));
-server.use(VerifyFrontendPath);
+// server.use('/', express.static(path.join(__dirname, 'build')));
+// server.use(VerifyFrontendPath);
 
 
 //login process

@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const VerifyJWT = (req, res, next) => {
     const authHeader = req.headers['Authorization'] || req.headers['authorization'];
-    console.log('HERERER')
 
     if (!req?._parsedUrl?.path.includes('api/')) {
         VerifyFrontendPath()
@@ -20,7 +19,6 @@ const VerifyJWT = (req, res, next) => {
                 process.env.ACCESS_TOKEN_SECRET,
                 (err, decoded) => {
                     if (err) {
-                        console.log(err.message);
                         res.sendStatus(401);
                     }
                     else {

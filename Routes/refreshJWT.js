@@ -8,8 +8,6 @@ const create_usernameInUrl = require('../FNS/create-usernameInUrl');
 
 router.route('/')
     .post(async (req, res) => {
-
-
         try {
             const refreshToken = req?.cookies?.Bearer;
             if (!refreshToken) {
@@ -42,7 +40,6 @@ router.route('/')
                         process.env.REFRESH_TOKEN_SECRET,
                         (err, decoded) => {
                             if (err) {
-
                                 res.sendStatus(403);
                             }
 
@@ -84,7 +81,7 @@ router.route('/')
                 }
             }
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             res?.sendStatus(500);
         }
     })

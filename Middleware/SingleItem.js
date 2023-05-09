@@ -7,6 +7,7 @@ const sharp = require('sharp');
 
 const SingleItem = async (req, res, next) => {
 
+
     let isValidUser;
     let selectedItem, querry;
 
@@ -57,7 +58,7 @@ const SingleItem = async (req, res, next) => {
                                 else {
                                     if (req?.files === null) {
                                         db.collection(querry)?.replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, title: req?.body?.title, coverart: req?.body?.coverart, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: req?.body?.uniqueId }).then((results) => {
-                                            console.log(results)
+
                                             if (results?.matchedCount > 0) {
                                                 res.sendStatus(200)
                                             }
@@ -76,7 +77,7 @@ const SingleItem = async (req, res, next) => {
 
                                             if (fileSystem.existsSync(ExistingFilePath)) {
                                                 fileSystem?.unlink(ExistingFilePath, () => {
-                                                    console.log('existing file deleted')
+
                                                 })
                                             }
 
@@ -149,7 +150,7 @@ const SingleItem = async (req, res, next) => {
                                 }
                                 else {
                                     db.collection(querry).replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, type: req?.body?.type, date: req?.body?.date, specifics: req?.body?.specifics, description: req?.body?.description }).then((results) => {
-                                        console.log(results)
+
                                         if (results?.matchedCount > 0) {
                                             res?.sendStatus(200);
                                         }

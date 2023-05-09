@@ -6,6 +6,7 @@ require('dotenv')?.config();
 
 router.route('/')
 
+
     .post(async (req, res) => {
         try {
             if (!req?.body?.code) {
@@ -20,9 +21,6 @@ router.route('/')
 
                     let emailTaken = await db.collection('users')?.findOne({ email: String(req?.body?.email) });
                     let usernameTaken = await db.collection('users')?.findOne({ username: req?.body?.phonenumber });
-
-                    console.log(usernameTaken)
-                    console.log(emailTaken)
 
                     if (emailTaken !== null || usernameTaken !== null) {
                         res?.sendStatus(409)
@@ -76,7 +74,7 @@ router.route('/')
                             //use node mailer to send email
                             transporter?.sendMail(mailOptions, async (error, success) => {
                                 if (error) {
-                                    res?.sendStatus(502)
+                                    throw error
                                 }
                                 else {
                                     bcrypt?.hash(req?.body?.password, 10).then((newPassword) => {
@@ -118,14 +116,14 @@ router.route('/')
                 }
             } else if (req?.body?.code) {
                 if (req?.body?.code?.trim().length < 6) {
-                    console.log('herererererer')
+
                     res?.sendStatus(405);
                 }
                 else {
 
 
                     if (!(includes?.includesLowerCase(req?.body?.code) && includes?.includesNumbers(req?.body?.code) && includes?.includesUpperCase(req?.body?.code))) {
-                        console.log('herererererer')
+
                         res?.sendStatus(405);
                     }
                     else {
