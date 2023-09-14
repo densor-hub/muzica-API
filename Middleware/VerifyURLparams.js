@@ -10,92 +10,83 @@ const VerifyURLparams = (async (req, res, next) => {
     else {
         try {
 
-            if (!(req?.query?.a && req?.query?.id)) {
+            if (!(req?.query?.a)) {
                 next();
             } else {
 
-
-                let id = req?.query?.id;
                 let artiste = req?.query?.a;
 
-                if ((id?.length === 24 && !id?.endsWith('/')) || (id?.length === 25 && id?.endsWith('/'))) {
-                    if ((id?.length === 25 && id?.endsWith('/'))) {
-                        id = id?.slice(0, id?.length - 1)
+                if (artiste?.endsWith('/')) {
+                    artiste = String(artiste?.slice(0, artiste?.length - 1))
+                }
+
+                let isValidWebsite = await db.collection('websitesCreated').findOne({ stagename: String(artiste)?.trim()?.toLocaleLowerCase() });
+
+                if (isValidWebsite === null || isValidWebsite === undefined) {
+
+                    res.sendStatus(404);
+                } else {
+
+                    let isValidUserWebsite = await db.collection('users')?.findOne({ _id: isValidWebsite?.userId });
+
+                    if (isValidUserWebsite === null || isValidUserWebsite === undefined) {
+                        res?.sendStatus(404);
                     }
+                    else {
 
+                        if (create_Username_url(isValidUserWebsite?.stagename?.trim()?.toLowerCase()) !== artiste?.trim()?.toLowerCase()) {
 
-                    let isValidWebsite = await db.collection('websitesCreated').findOne({ _id: ObjectId(id) });
-
-
-                    if (isValidWebsite === null || isValidWebsite === undefined) {
-
-                        res.sendStatus(404);
-                    } else {
-
-                        let isValidUserWebsite = await db.collection('users')?.findOne({ _id: isValidWebsite?.userId });
-
-                        if (isValidUserWebsite === null || isValidUserWebsite === undefined) {
-                            res?.sendStatus(404);
+                            res.sendStatus(404)
                         }
                         else {
+                            //get all posts from Database
+                            let submittedAudios = await db.collection('audios').find({ userId: isValidUserWebsite._id }).toArray()
+                            let submittedVideos = await db.collection('videos').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submittedImages = await db.collection('images').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submitedUpcoming = await db.collection('upcoming').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submittedNews = await db.collection('news').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submittedBiography = await db.collection('biography').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submittedSocials = await db.collection('socialmedia').find({ userId: isValidUserWebsite._id }).toArray();
+                            let submittedBookingsInfo = await db.collection('bookings-info')?.find({ userId: isValidUserWebsite._id }).toArray();
 
-                            if (create_Username_url(isValidUserWebsite?.stagename?.trim()?.toLowerCase()) !== artiste?.trim()?.toLowerCase()) {
 
-                                res.sendStatus(404)
+                            //filtereing upcoming to attain unexpired upcoming
+                            let UnexpiredUpcoming = [];
+                            if (submitedUpcoming?.length > 0) {
+                                submitedUpcoming?.forEach((element) => {
+                                    if (DateValidator?.equal_To_Or_Bigger_Than_Toadys_Date(element?.date)) {
+                                        UnexpiredUpcoming.push(element);
+                                    }
+                                });
+                            }
+
+                            let AllSubmitedDetails = [submittedAudios, submittedVideos, submittedImages, UnexpiredUpcoming, submittedNews, submittedBiography, submittedSocials, submittedBookingsInfo];
+                            let correspondingHeaders = ['audios', "videos", "images", "upcoming", "news", "biography", "contact", 'bookings-info', 'home'];
+                            let websiteData = [];
+                            let validAPI_EndPoints = [];
+
+
+                            //corresponding data from database with key
+                            for (var i = 0; i < AllSubmitedDetails?.length; i++) {
+                                // if(AllSubmitedDetails[i].length!==0){
+                                let key = correspondingHeaders[i];
+                                let value = AllSubmitedDetails[i];
+                                websiteData.push({ key, value })
+                                validAPI_EndPoints.push("/" + correspondingHeaders[i] + req?._parsedUrl?.search)
+                                //  }
+                            }
+
+
+                            if (websiteData?.length === AllSubmitedDetails?.length) {
+                                res.status(200).json({ websiteData, validAPI_EndPoints })
                             }
                             else {
-
-
-                                //get all posts from Database
-                                let submittedAudios = await db.collection('audios').find({ userId: isValidUserWebsite._id }).toArray()
-                                let submittedVideos = await db.collection('videos').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submittedImages = await db.collection('images').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submitedUpcoming = await db.collection('upcoming').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submittedNews = await db.collection('news').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submittedBiography = await db.collection('biography').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submittedSocials = await db.collection('socialmedia').find({ userId: isValidUserWebsite._id }).toArray();
-                                let submittedBookingsInfo = await db.collection('bookings-info')?.find({ userId: isValidUserWebsite._id }).toArray();
-
-
-                                //filtereing upcoming to attain unexpired upcoming
-                                let UnexpiredUpcoming = [];
-                                if (submitedUpcoming?.length > 0) {
-                                    submitedUpcoming?.forEach((element) => {
-                                        if (DateValidator?.equal_To_Or_Bigger_Than_Toadys_Date(element?.date)) {
-                                            UnexpiredUpcoming.push(element);
-                                        }
-                                    });
-                                }
-
-                                let AllSubmitedDetails = [submittedAudios, submittedVideos, submittedImages, UnexpiredUpcoming, submittedNews, submittedBiography, submittedSocials, submittedBookingsInfo];
-                                let correspondingHeaders = ['audios', "videos", "images", "upcoming", "news", "biography", "contact", 'bookings-info', 'home'];
-                                let websiteData = [];
-                                let validAPI_EndPoints = [];
-
-
-                                //corresponding data from database with key
-                                for (var i = 0; i < AllSubmitedDetails?.length; i++) {
-                                    // if(AllSubmitedDetails[i].length!==0){
-                                    let key = correspondingHeaders[i];
-                                    let value = AllSubmitedDetails[i];
-                                    websiteData.push({ key, value })
-                                    validAPI_EndPoints.push("/" + correspondingHeaders[i] + req?._parsedUrl?.search)
-                                    //  }
-                                }
-
-
-                                if (websiteData?.length === AllSubmitedDetails?.length) {
-                                    res.status(200).json({ websiteData, validAPI_EndPoints })
-                                }
-                                else {
-                                    res.sendStatus(404)
-                                }
+                                res.sendStatus(404)
                             }
                         }
                     }
-                } else {
-                    res.sendStatus(404);
                 }
+
             }
         } catch (error) {
             console.log(error)

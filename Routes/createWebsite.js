@@ -35,37 +35,32 @@ router.route('/')
                     let websiteData = [];
 
 
-                    for (var i = 0; i < AllSubmitedDetails?.length; i++) {
-                        if (AllSubmitedDetails[i].length !== 0 || (AllSubmitedDetails[i]?.length === 0 && correspondingHeaders[i] === 'upcoming')) {
+                    if (AllSubmitedDetails.find(elements => { return elements?.length > 0 })) {
+                        for (var i = 0; i < AllSubmitedDetails?.length; i++) {
                             let key = correspondingHeaders[i];
                             let value = AllSubmitedDetails[i];
                             websiteData.push({ key, value })
                         }
-
+                    } else {
+                        res?.sendStatus(405);
                     }
 
                     if (websiteData?.length === AllSubmitedDetails?.length) {
 
-                        await db.collection('users').replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: isValidUser?.password, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, googleId: isValidUser?.googleId, email: isValidUser?.email, websiteCreated: true, refresher: isValidUser.refresher }).then((results) => {
+                        await db.collection('users').replaceOne({ _id: isValidUser?._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: isValidUser?.password, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: isValidUser?.profilePicture, googleId: isValidUser?.googleId, email: isValidUser?.email, websiteCreated: true, refresher: isValidUser.refresher }).then(async (results) => {
 
+                            //changes from here
                             if (results?.matchedCount > 0) {
-                                db.collection('websitesCreated')?.findOne({ userId: isValidUser?._id }).then(async (results) => {
-
-                                    if (results === null) {
-                                        await db.collection('websitesCreated')?.insertOne({ userId: isValidUser?._id }).then((newWebsite) => {
-                                            const websiteUrl = `${req?.body?.clientOrigin}${req.url}home?a=${createUsernameInURL(isValidUser?.stagename.toLowerCase())}&&id=${String(newWebsite?.insertedId)}`;
-                                            res.status(200).send({ websiteUrl });
-                                        }
-                                        )
-                                    } else {
-                                        const websiteUrl = `${req?.body?.clientOrigin}${req.url}home?a=${createUsernameInURL(isValidUser?.stagename.toLowerCase())}&&id=${String(results?._id)}`;
-                                        res.status(200).send({ websiteUrl });
-                                    }
-
-
-                                })
+                                await db.collection('websitesCreated')?.insertOne({ userId: isValidUser?._id, stagename: createUsernameInURL(isValidUser?.stagename.toLowerCase()) }).then((newWebsite) => {
+                                    const websiteUrl = `${req?.body?.clientOrigin}${req.url}home?a=${createUsernameInURL(isValidUser?.stagename.toLowerCase())}`;
+                                    console.log(websiteUrl)
+                                    res.status(200).send({ websiteUrl });
+                                }
+                                )
                             }
                         })
+                    } else {
+                        res.sendStatus(405);
                     }
                 }
 

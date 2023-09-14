@@ -58,25 +58,21 @@ router.route('/')
                                 res.sendStatus(405);
                             }
                             else {
-                                if (req?.files?.file?.size > (5 * 1024 * 1024)) {
-                                    res.sendStatus(405);
-                                }
-                                else {
-                                    if (isValidUser?.profilePicture !== "") {
-                                        let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname?.split('api')[1]);
 
-                                        if (fileSystem.existsSync(ExitingDpfilePath)) {
-                                            fileSystem?.unlink(ExitingDpfilePath, () => {
-                                                SetNewImage(req, res, isValidUser)
-                                            });
-                                        }
-                                        else {
-                                            SetNewImage(req, res, isValidUser);
-                                        }
+                                if (isValidUser?.profilePicture !== "") {
+                                    let ExitingDpfilePath = path?.join(__dirname, '..', new URL(isValidUser?.profilePicture)?.pathname?.split('api')[1]);
+
+                                    if (fileSystem.existsSync(ExitingDpfilePath)) {
+                                        fileSystem?.unlink(ExitingDpfilePath, () => {
+                                            SetNewImage(req, res, isValidUser)
+                                        });
                                     }
                                     else {
                                         SetNewImage(req, res, isValidUser);
                                     }
+                                }
+                                else {
+                                    SetNewImage(req, res, isValidUser);
                                 }
                             }
                         }
@@ -197,7 +193,7 @@ const SetNewImage = (req, res, isValidUser) => {
                         })
                     }
 
-                    const imageURL = `${req.protocol}:${req.url + req.url}${req.get('host')}/api/uploads${req.url}${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`;
+                    const imageURL = `https://muzica.goldcoastuni.com/api/uploads/${identifier}-cdp.${req.files.file.mimetype.split('/')[1]}`;
 
 
                     db.collection('users').replaceOne({ _id: isValidUser._id }, { _id: isValidUser?._id, username: isValidUser?.username, password: isValidUser?.password, fullname: isValidUser?.fullname, gender: isValidUser?.gender, stagename: isValidUser?.stagename, profilePicture: imageURL, email: isValidUser?.email, websiteCreated: isValidUser?.websiteCreated, googleId: isValidUser?.googleId, refresher: isValidUser?.refresher }).then((results) => {

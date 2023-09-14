@@ -64,6 +64,7 @@ server?.use('/api/user', require('./Routes/user-settings-Route'));
 
 server?.use('/api/reset-password', require('./Routes/reset-password'));
 
+
 server?.use(VerifyURLparams);
 
 

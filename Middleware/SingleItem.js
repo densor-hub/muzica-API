@@ -91,7 +91,7 @@ const SingleItem = async (req, res, next) => {
                                                     sharp(newfilePath)?.resize(200, 200, { fit: "cover" })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
 
                                                         if (results) {
-                                                            const imageURL = `${req.protocol}://${req.get('host')}/api/uploads/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
+                                                            const imageURL = `https://muzica.goldcoastuni.com/api/uploads/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
 
                                                             db.collection(querry)?.replaceOne({ _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]) }, { _id: ObjectId(req?._parsedUrl?.pathname?.split(':')[1]), userId: isValidUser?._id, title: req?.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then((results) => {
                                                                 if (results?.matchedCount > 0) {

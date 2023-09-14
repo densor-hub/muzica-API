@@ -25,7 +25,9 @@ const getUploadedData = async (req, res, next) => {
                 else {
 
                     if (isValidUser !== null && isValidUser !== undefined) {
+
                         let addedItems = await db.collection(`${querry}`).find({ userId: isValidUser?._id }).toArray();
+
                         if ((querry === 'audios' || querry === 'videos' || querry === 'images' || querry === 'biography' || querry === 'news')) {
                             if (addedItems !== null && addedItems !== undefined) {
                                 if (addedItems?.length > 0) {
@@ -51,11 +53,14 @@ const getUploadedData = async (req, res, next) => {
                         }
                         else if (querry === 'upcoming') {
                             addedItems?.forEach((element) => {
-                                if (DurationValidator.equal_To_Or_Bigger_Than_Toadys_Date(element?.date)) {
-                                    Unexpired.push(element);
+                                if (element?.skip) {
+
+                                } else {
+                                    if (DurationValidator.equal_To_Or_Bigger_Than_Toadys_Date(element?.date)) {
+                                        Unexpired.push(element);
+                                    }
                                 }
                             })
-
 
                             if (Unexpired?.length > 0) {
                                 res?.status(200)?.json({ querry, addedItems: Unexpired });

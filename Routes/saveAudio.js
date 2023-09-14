@@ -39,75 +39,70 @@ router.route('/')
                             res.sendStatus(405);
                         }
                         else {
-                            if (req?.files?.file?.size > (5 * 1024 * 1024)) {
-                                res.sendStatus(405);
-                            }
-                            else {
-                                let identifier = `${removeWhiteSpaces(req.body.title.toLowerCase())}${Date.now()}`;
-                                let filePath = `${path.join(__dirname, '../uploads')}${req.url}${identifier}.${req.files.file.mimetype.split('/')[1]}`;
+                            let identifier = `${removeWhiteSpaces(req.body.title.toLowerCase())}${Date.now()}`;
+                            let filePath = `${path.join(__dirname, '../uploads')}${req.url}${identifier}.${req.files.file.mimetype.split('/')[1]}`;
 
-                                // await CompressImage(req?.files?.file, req?.body?.title).then((results) => {
-                                //     console.log('RESULTSSSSS')
-                                //     console.log("results")
-                                // })
+                            // await CompressImage(req?.files?.file, req?.body?.title).then((results) => {
+                            //     console.log('RESULTSSSSS')
+                            //     console.log("results")
+                            // })
 
-                                req.files.file.mv(filePath, (error) => {
-                                    if (error) {
-                                        res.sendStatus(500)
-                                    }
-                                    else {
-                                        sharp(filePath)?.resize(200, 200, { fit: "cover" })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
+                            req.files.file.mv(filePath, (error) => {
+                                if (error) {
+                                    res.sendStatus(500)
+                                }
+                                else {
+                                    sharp(filePath)?.resize(200, 200, { fit: "cover" })?.withMetadata()?.toFile(`${path?.join(__dirname, '../uploads')}/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`).then((results) => {
 
-                                            if (results) {
-                                                //caca - compressed audio cover art
-                                                fileSystem?.unlink(filePath, () => {
-                                                    const imageURL = `${req.protocol}://${req.get('host')}/api/uploads${req.url}${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
+                                        if (results) {
+                                            //caca - compressed audio cover art
+                                            fileSystem?.unlink(filePath, () => {
+                                                const imageURL = `https://muzica.goldcoastuni.com/api/uploads/${identifier}-caca.${req.files.file.mimetype.split('/')[1]}`;
 
-                                                    db.collection('audios').insertOne({ userId: isValidUser._id, title: req.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then(async (results) => {
+                                                db.collection('audios').insertOne({ userId: isValidUser._id, title: req.body?.title, coverart: imageURL, datereleased: req?.body?.datereleased, applemusic: req?.body?.applemusic, spotify: req?.body?.spotify, audiomack: req?.body?.audiomack, youtube: req?.body?.youtube, soundcloud: req?.body?.soundcloud, uniqueId: identifier }).then(async (results) => {
 
-                                                        if (results?.acknowledged && results?.insertedId) {
-                                                            if (req.body.not_current_content) {
-                                                                res?.sendStatus(200);
-                                                            }
-                                                            else {
-                                                                let existingCurrentContent = await db.collection('currentconent')?.findOne({ userId: isValidUser?._id });
-
-                                                                if (existingCurrentContent !== null) {
-                                                                    db.collection('currentconent')?.replaceOne({ _id: existingCurrentContent?._id }, { _id: existingCurrentContent?._id, userId: existingCurrentContent?.userId, currentContent: 'audios', submitted: 'audios' }).then(() => {
-                                                                        res?.sendStatus(200);
-                                                                    }
-                                                                    )
-                                                                } else {
-                                                                    db.collection('currentconent')?.insertOne({ userId: isValidUser?._id, currentContent: "audios", submitted: "audios" }).then((results) => {
-                                                                        if (results?.insertedId) {
-                                                                            res.sendStatus(200);
-                                                                        } else {
-                                                                            res?.sendStatus(204)
-                                                                        }
-                                                                    })
-                                                                }
-                                                            }
-
+                                                    if (results?.acknowledged && results?.insertedId) {
+                                                        if (req.body.not_current_content) {
+                                                            res?.sendStatus(200);
                                                         }
                                                         else {
-                                                            if (fileSystem.existsSync(filePath)) {
-                                                                fileSystem.unlink(filePath, () => {
-                                                                    res.sendStatus(500);
-                                                                });
+                                                            let existingCurrentContent = await db.collection('currentconent')?.findOne({ userId: isValidUser?._id });
+
+                                                            if (existingCurrentContent !== null) {
+                                                                db.collection('currentconent')?.replaceOne({ _id: existingCurrentContent?._id }, { _id: existingCurrentContent?._id, userId: existingCurrentContent?.userId, currentContent: 'audios', submitted: 'audios' }).then(() => {
+                                                                    res?.sendStatus(200);
+                                                                }
+                                                                )
+                                                            } else {
+                                                                db.collection('currentconent')?.insertOne({ userId: isValidUser?._id, currentContent: "audios", submitted: "audios" }).then((results) => {
+                                                                    if (results?.insertedId) {
+                                                                        res.sendStatus(200);
+                                                                    } else {
+                                                                        res?.sendStatus(204)
+                                                                    }
+                                                                })
                                                             }
                                                         }
-                                                    });
-                                                })
-                                            }
-                                        })
+
+                                                    }
+                                                    else {
+                                                        if (fileSystem.existsSync(filePath)) {
+                                                            fileSystem.unlink(filePath, () => {
+                                                                res.sendStatus(500);
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            })
+                                        }
+                                    })
 
 
 
-                                    }
-                                })
+                                }
+                            })
 
 
-                            }
                         }
                     }
 
