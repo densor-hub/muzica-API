@@ -1,85 +1,104 @@
-
 const { ObjectId } = require("mongodb");
-const DurationValidator = require('../FNS/DurationValidator')
-
+const DurationValidator = require("../FNS/DurationValidator");
 
 const getUploadedData = async (req, res, next) => {
+  try {
+    if (!req?.cookies?.Bearer) {
+      res.sendStatus(401);
+    } else {
+      let isValidUser = await db
+        .collection("users")
+        .findOne({ refresher: req?.cookies?.Bearer });
 
-    try {
-        if (!req?.cookies?.Bearer) {
-            res.sendStatus(401);
-        }
-        else {
-            let isValidUser = await db.collection('users').findOne({ refresher: req?.cookies?.Bearer });
+      if (isValidUser === null) {
+        res?.sendStatus(403);
+      } else {
+        let querry = req?._parsedUrl?.pathname
+          ?.slice(1, req?._parsedUrl?.pathname?.length)
+          .split("-")[2];
+        let Unexpired = [];
 
-            if (isValidUser === null) {
-                res?.sendStatus(403)
-            }
-            else {
-                let querry = req?._parsedUrl?.pathname?.slice(1, req?._parsedUrl?.pathname?.length).split('-')[2];
-                let Unexpired = [];
+        if (req?._parsedUrl?.pathname?.includes(":")) {
+          next();
+        } else {
+          if (isValidUser !== null && isValidUser !== undefined) {
+            let addedItems = await db
+              .collection(`${querry}`)
+              .find({ userId: isValidUser?._id })
+              .toArray();
 
-                if (req?._parsedUrl?.pathname?.includes(':')) {
-                    next()
-                }
-                else {
-
-                    if (isValidUser !== null && isValidUser !== undefined) {
-
-                        let addedItems = await db.collection(`${querry}`).find({ userId: isValidUser?._id }).toArray();
-
-                        if ((querry === 'audios' || querry === 'videos' || querry === 'images' || querry === 'biography' || querry === 'news')) {
-                            if (addedItems !== null && addedItems !== undefined) {
-                                if (addedItems?.length > 0) {
-                                    res.status(200).json({ querry, addedItems })
-                                }
-                                else {
-                                    res.sendStatus(204)
-                                }
-                            }
-                            else {
-                                res?.sendStatus(204)
-                            }
-                        }
-                        else if (querry === 'socialmedia') {
-                            await db.collection('bookings-info').findOne({ userId: isValidUser?._id }).then((results) => {
-                                if (results !== null && results !== undefined) {
-                                    res.status(200).json({ querry, addedItems, bookings: results })
-                                }
-                                else {
-                                    res.sendStatus(204);
-                                }
-                            })
-                        }
-                        else if (querry === 'upcoming') {
-                            addedItems?.forEach((element) => {
-                                if (element?.skip) {
-
-                                } else {
-                                    if (DurationValidator.equal_To_Or_Bigger_Than_Toadys_Date(element?.date)) {
-                                        Unexpired.push(element);
-                                    }
-                                }
-                            })
-
-                            if (Unexpired?.length > 0) {
-                                res?.status(200)?.json({ querry, addedItems: Unexpired });
-                            } else {
-                                res.sendStatus(204)
-                            }
-                        }
+            if (
+              querry === "audios" ||
+              querry === "videos" ||
+              querry === "images" ||
+              querry === "biography" ||
+              querry === "news"
+            ) {
+              if (addedItems !== null && addedItems !== undefined) {
+                if (addedItems?.length > 0) {
+                  if (querry === "images" || querry === "audios") {
+                    var imagesConvertedIntoBuffer = [];
+                    for (i = 0; i < addedItems?.length; i++) {
+                      imagesConvertedIntoBuffer.push({
+                        ...addedItems[i],
+                        image: addedItems[i].image?.buffer,
+                      });
                     }
-                    else {
-                        res.sendStatus(204)
-                    }
+                    res
+                      .status(200)
+                      .json({ querry, addedItems: imagesConvertedIntoBuffer });
+                  } else {
+                    res.status(200).json({ querry, addedItems });
+                  }
+                } else {
+                  res.sendStatus(204);
                 }
-            }
+              } else {
+                res?.sendStatus(204);
+              }
+            } else if (querry === "socialmedia") {
+              await db
+                .collection("bookings-info")
+                .findOne({ userId: isValidUser?._id })
+                .then((results) => {
+                  if (results !== null && results !== undefined) {
+                    res
+                      .status(200)
+                      .json({ querry, addedItems, bookings: results });
+                  } else {
+                    res.sendStatus(204);
+                  }
+                });
+            } else if (querry === "upcoming") {
+              addedItems?.forEach((element) => {
+                if (element?.skip) {
+                } else {
+                  if (
+                    DurationValidator.equal_To_Or_Bigger_Than_Toadys_Date(
+                      element?.date
+                    )
+                  ) {
+                    Unexpired.push(element);
+                  }
+                }
+              });
 
+              if (Unexpired?.length > 0) {
+                res?.status(200)?.json({ querry, addedItems: Unexpired });
+              } else {
+                res.sendStatus(204);
+              }
+            }
+          } else {
+            res.sendStatus(204);
+          }
         }
-    } catch (error) {
-        console.log(error);
-        res?.sendStatus(500)
+      }
     }
-}
+  } catch (error) {
+    console.log(error);
+    res?.sendStatus(500);
+  }
+};
 
 module.exports = getUploadedData;
