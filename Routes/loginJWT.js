@@ -90,7 +90,7 @@ router
                       secure: true,
                       domain: "localhost",
                       maxAge: 24 * 60 * 60 * 1000,
-                      sameSite: "None",
+                      sameSite: "none",
                     });
 
                     //send requisite auth  values

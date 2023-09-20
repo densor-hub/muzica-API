@@ -23,15 +23,14 @@ router
             )
             .then((results) => {
               if (results.modifiedCount > 0) {
-                req?._destroy(null, () => {
-                  res?.clearCookie("Bearer");
-                  res.sendStatus(200);
-                });
+                res?.clearCookie("Bearer");
+                res.sendStatus(200);
               } else {
                 res.sendStatus(408);
               }
             });
         } else {
+          res?.clearCookie("Bearer");
           res.sendStatus(200);
         }
       }
