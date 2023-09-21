@@ -1,8 +1,8 @@
 const { MongoClient } = require("mongodb");
 require("dotenv")?.config();
 
-const localCluster = `${process?.env?.MONGO_LOCAL}`;
-const onlineCluster = `${process?.env?.MONGO_CLOUD}`;
+const localCluster = `${process?.env?.DATABASE_URL}`;
+const onlineCluster = `${process?.env?.DATABASE_URL}`;
 
 let dbConnection;
 module.exports = {
