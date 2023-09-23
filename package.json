@@ -35,5 +35,8 @@
   "devDependencies": {
     "@flydotio/dockerfile": "^0.4.10",
     "nodemon": "^2.0.19"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
