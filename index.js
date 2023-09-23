@@ -13,7 +13,6 @@ const SingleItem = require("./Middleware/SingleItem");
 //const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
 
 const hostname = "0.0.0.0";
-const port = process.env.port || 3000;
 
 const server = express();
 
@@ -32,8 +31,8 @@ server.use(fileUpload());
 //db connection
 connectToDb((err) => {
   if (!err) {
-    server.listen(port, hostname, () => {
-      console.log(`Server running on port ${port}`);
+    server.listen(process.env.PORT, hostname, () => {
+      console.log(`Server running on port ${process.env.PORT}`);
     });
     db = getDb();
   }
