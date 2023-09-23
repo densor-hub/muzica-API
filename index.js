@@ -12,14 +12,15 @@ const verifySearch = require("./Middleware/verifySearch");
 const SingleItem = require("./Middleware/SingleItem");
 //const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
 
-const PORT = 3500;
+const hostname = "0.0.0.0";
+const port = process.env.port || 3000;
 
 const server = express();
 
 //provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://muzic.fly.dev"],
     credentials: true,
   })
 );
@@ -31,14 +32,17 @@ server.use(fileUpload());
 //db connection
 connectToDb((err) => {
   if (!err) {
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    server.listen(port, hostname, () => {
+      console.log(`Server running on port ${port}`);
     });
     db = getDb();
   }
 });
 
 //pulic
+server.get("/api", (req, res) => {
+  res?.status(200)?.send({ Hello: "HELLO FROM MUZIC !! " });
+});
 server.use("/api/register", require("./Routes/registerUser"));
 server.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 
