@@ -88,9 +88,9 @@ router
                     res.cookie("Bearer ", refreshToken, {
                       httpOnly: true,
                       secure: true,
-                      domain: "localhost",
+                      domain: "muzic-4ihi.onrender.com",
                       maxAge: 24 * 60 * 60 * 1000,
-                      sameSite: "none",
+                      sameSite: "None",
                     });
 
                     //send requisite auth  values
