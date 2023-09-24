@@ -80,14 +80,6 @@ router
               let identifier = `${removeWhiteSpaces(
                 req.body.title.toLowerCase()
               )}${Date.now()}`;
-              let filePath = `${path.join(__dirname, "../uploads")}${
-                req.url
-              }${identifier}.${req.files.file.mimetype.split("/")[1]}`;
-
-              // await CompressImage(req?.files?.file, req?.body?.title).then((results) => {
-              //     console.log('RESULTSSSSS')
-              //     console.log("results")
-              // })
 
               sharp(req.files.file?.data)
                 ?.resize(200, 200, { fit: "cover" })
@@ -97,15 +89,9 @@ router
                   db.collection("audios")
                     .insertOne({
                       userId: isValidUser._id,
-                      title: req.body?.title,
-                      coverart: results,
-                      datereleased: req?.body?.datereleased,
-                      applemusic: req?.body?.applemusic,
-                      spotify: req?.body?.spotify,
-                      audiomack: req?.body?.audiomack,
-                      youtube: req?.body?.youtube,
-                      soundcloud: req?.body?.soundcloud,
+                      image: results,
                       uniqueId: identifier,
+                      ...req.body,
                     })
                     .then(async (results) => {
                       if (results?.acknowledged && results?.insertedId) {

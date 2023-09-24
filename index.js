@@ -10,7 +10,7 @@ const VerifyURLparams = require("./Middleware/VerifyURLparams");
 const VerifyJWT = require("./Middleware/verifJWT");
 const verifySearch = require("./Middleware/verifySearch");
 const SingleItem = require("./Middleware/SingleItem");
-//const VerifyFrontendPath = require('./Middleware/verifyFrontEndPath');
+const VerifyFrontendPath = require("./Middleware/verifyFrontEndPath");
 
 const hostname = "0.0.0.0";
 
@@ -19,7 +19,7 @@ const server = express();
 //provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(
   cors({
-    origin: ["http://localhost:3000", "https://muzic.fly.dev"],
+    origin: ["http://localhost:3000"],
     credentials: true,
   })
 );
@@ -38,16 +38,14 @@ connectToDb((err) => {
   }
 });
 
-//pulic
-server.get("/api", (req, res) => {
-  res?.status(200)?.send({ Hello: "HELLO FROM MUZIC !! " });
-});
+//espress hosting static files
+server.use(express.static(path.join(__dirname, "build")));
+
+//serving front end
+server.use(VerifyFrontendPath);
+
 server.use("/api/register", require("./Routes/registerUser"));
 server.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
-
-//servinf front end
-// server.use('/', express.static(path.join(__dirname, 'build')));
-// server.use(VerifyFrontendPath);
 
 //login process
 server.use("/api/sign-in/local", require("./Routes/loginJWT"));
