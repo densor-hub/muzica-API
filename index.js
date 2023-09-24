@@ -40,8 +40,8 @@ connectToDb((err) => {
 
 //pulic
 //serving front end
-//server.use("/", express.static(path.join(__dirname, "build")));
-// server.use(VerifyFrontendPath);
+server.use("/", express.static(path.join(__dirname, "build")));
+server.use(VerifyFrontendPath);
 
 server.get("/", (req, res) => {
   res?.status(200)?.send({ Hello: "HELLO FROM MUZIC !! " });
