@@ -19,7 +19,7 @@ const server = express();
 //provided frontend is not on same site as backend, frontend url is what is used as origin in cors
 server.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:10000"],
     credentials: true,
   })
 );
@@ -38,12 +38,14 @@ connectToDb((err) => {
   }
 });
 
-//espress hosting static files
-server.use(express.static(path.join(__dirname, "build")));
-
+//pulic
 //serving front end
-server.use(VerifyFrontendPath);
+//server.use("/", express.static(path.join(__dirname, "build")));
+// server.use(VerifyFrontendPath);
 
+server.get("/", (req, res) => {
+  res?.status(200)?.send({ Hello: "HELLO FROM MUZIC !! " });
+});
 server.use("/api/register", require("./Routes/registerUser"));
 server.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 
